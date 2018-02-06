@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import { StyleSheet, Text, View } from "react-native";
+import { StyleSheet, Text, View, Animated } from "react-native";
 
 const numberRange = Array(10)
   .fill()
@@ -21,18 +21,26 @@ function getRandom(min, max) {
 }
 
 class Tick extends Component {
+  
+  componentWillMount() {
+    this.animation = new Animated.Value(getPosition(this.props.value, this.props.height));
+  }
+  
   componentDidUpdate(prevProps, prevState) {
-    console.log({
-      prevValue: prevProps.value,
-      curValue: this.props.value
-    })
+    if (this.props.value !== prevProps.value) {
+      Animated.timing(this.animation, {
+        toValue: getPosition(this.props.value, this.props.height),
+        duration: 500,
+        useNativeDriver: true,
+      }).start();
+    }
   }
   
   render() {
-    const transformStyle = getTranslateStyle(getPosition(this.props.value, this.props.height));
+    const transformStyle = getTranslateStyle(this.animation);
 
     return (
-      <View style={transformStyle}>
+      <Animated.View style={transformStyle}>
         {numberRange.map(v => {
           return (
             <Text key={v} style={styles.text}>
@@ -40,7 +48,7 @@ class Tick extends Component {
             </Text>
           );
         })}
-      </View>
+      </Animated.View>
     );
   }
 }
